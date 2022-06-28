@@ -8,6 +8,7 @@ import {
   Alert
 } from 'react-native';
 import {Camera} from 'expo-camera';
+import RNShake from 'react-native-shake';
 
 
 
@@ -42,6 +43,16 @@ export default function App() {
       setHasPermission(status === 'granted');
     })();
   }, [/*toggle*/]);
+
+  useEffect(() => {
+    const subscription = RNShake.addListener(() => {
+      handleChangeToggle();
+    });
+
+    //Chamar quando componente for desmontado
+    return () => subscription.remove();
+  }, []);
+
 
   if(hasPermission === false) {
     return () => Alert.alert('Access denied.');
