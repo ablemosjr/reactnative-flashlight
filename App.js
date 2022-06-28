@@ -1,4 +1,3 @@
-//import {StatusBar} from 'expo-status-bar';
 import React, {useState, useEffect} from 'react';
 import {
   View, 
@@ -8,9 +7,7 @@ import {
   Alert
 } from 'react-native';
 import {Camera} from 'expo-camera';
-import RNShake from 'react-native-shake';
-
-
+import * as Shake from 'expo-shake';
 
 //Lamps
 import darkLamp from './assets/icons/eco-light-off.png';
@@ -19,22 +16,15 @@ import lightLamp from './assets/icons/eco-light.png';
 import lightLogo from './assets/icons/logo-dio.png';
 import darkLogo from './assets/icons/logo-dio-white.png';
 
-
-
 export default function App() {
   const [toggle, setToggle] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
-  const [flash, setFlash] = useState(Camera.Constants.FlashMode.off);
-  
-  const handleChangeToggle = () => {
-    setToggle(oldToggle => !oldToggle);
-    setFlash(flash === Camera.Constants.FlashMode.off
-      ? Camera.Constants.FlashMode.torch
-      : Camera.Constants.FlashMode.off);
-}
+
+  const handleChangeToggle = () => setToggle(oldToggle => !oldToggle);
 
   useEffect(() => {
-    /*//Desmonta o componente antigo e monta o novo
+    /*
+    //Desmonta o componente antigo e monta o novo
     Alert.alert('Atualizou o componente: ' + toggle);
     return () => Alert.alert('Desmontou o componente.');
     */
@@ -45,22 +35,23 @@ export default function App() {
   }, [/*toggle*/]);
 
   useEffect(() => {
-    const subscription = RNShake.addListener(() => {
-      handleChangeToggle();
+    Shake.addListener(() => {
+      setToggle(oldToggle => !oldToggle);
     });
 
     //Chamar quando componente for desmontado
-    return () => subscription.remove();
+    return () => {
+      Shake.removeSubscription(() => {});
+    }
   }, []);
-
 
   if(hasPermission === false) {
     return () => Alert.alert('Access denied.');
   }
-
-  console.log('Toggle: ' + toggle);
-  console.log('FLASH: ' + flash);
-  console.log('Has permission: ' + hasPermission);
+  
+  //console.log('Toggle: ' + toggle);
+  //console.log('FLASH: ' + flash);
+  //console.log('Has permission: ' + hasPermission);
 
   return (
     <View style={toggle ? style.lightContainer : style.darkContainer}>
@@ -73,11 +64,13 @@ export default function App() {
           style={style.logo}
           source={toggle ? lightLogo: darkLogo}
         />
-        <Camera 
-          style={{height: 1, width: 1}} 
-          type={Camera.Constants.Type.back} 
-          flashMode={flash}>
-        </Camera>   
+        {(hasPermission && toggle) && (
+          <Camera 
+            style={{height: 1, width: 1, opacity: 0}} 
+            type={Camera.Constants.Type.back} 
+            flashMode={Camera.Constants.FlashMode.torch}>
+          </Camera>
+        )}
       </TouchableOpacity>
     </View>
   );
