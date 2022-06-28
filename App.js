@@ -1,10 +1,15 @@
 //import {StatusBar} from 'expo-status-bar';
+import React, {useState, useEffect} from 'react';
 import {
   View, 
   StyleSheet,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  Alert
 } from 'react-native';
+import {Camera} from 'expo-camera';
+
+
 
 //Lamps
 import darkLamp from './assets/icons/eco-light-off.png';
@@ -16,19 +21,53 @@ import darkLogo from './assets/icons/logo-dio-white.png';
 
 
 export default function App() {
-  const toggle = true;
+  const [toggle, setToggle] = useState(false);
+  const [hasPermission, setHasPermission] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [flash, setFlash] = useState(Camera.Constants.FlashMode.off);
+  
+  const handleChangeToggle = () => {
+    setToggle(oldToggle => !oldToggle);
+    setFlash(flash === Camera.Constants.FlashMode.off
+      ? Camera.Constants.FlashMode.torch
+      : Camera.Constants.FlashMode.off);
+}
+
+  useEffect(() => {
+    /*//Desmonta o componente antigo e monta o novo
+    Alert.alert('Atualizou o componente: ' + toggle);
+    return () => Alert.alert('Desmontou o componente.');
+    */
+    (async () => {
+      const {status} = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, [/*toggle*/]);
+
+  if(hasPermission === false) {
+    return () => Alert.alert('Access denied.');
+  }
+
+  console.log('Toggle: ' + toggle);
+  console.log('FLASH: ' + flash);
+  console.log('Has permission: ' + hasPermission);
 
   return (
     <View style={toggle ? style.lightContainer : style.darkContainer}>
-      <TouchableOpacity onPress={() => {}}>
+      <TouchableOpacity onPress={handleChangeToggle}>
         <Image
           style={toggle ? style.lightOn : style.lightOff}
-          source={toggle ? lightLamp: darkLamp}
+          source={toggle ? lightLamp : darkLamp}
         />
         <Image
           style={style.logo}
           source={toggle ? lightLogo: darkLogo}
         />
+        <Camera 
+          style={{height: 0}} 
+          type={type} 
+          flashMode={flash}>
+        </Camera>   
       </TouchableOpacity>
     </View>
   );
