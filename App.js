@@ -23,7 +23,6 @@ import darkLogo from './assets/icons/logo-dio-white.png';
 export default function App() {
   const [toggle, setToggle] = useState(false);
   const [hasPermission, setHasPermission] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
   const [flash, setFlash] = useState(Camera.Constants.FlashMode.off);
   
   const handleChangeToggle = () => {
@@ -64,8 +63,8 @@ export default function App() {
           source={toggle ? lightLogo: darkLogo}
         />
         <Camera 
-          style={{height: 0}} 
-          type={type} 
+          style={{height: 1, width: 1}} 
+          type={Camera.Constants.Type.back} 
           flashMode={flash}>
         </Camera>   
       </TouchableOpacity>
